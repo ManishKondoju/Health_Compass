@@ -1,39 +1,40 @@
-# Core Framework
-streamlit==1.29.0
-python-dotenv==1.0.0
+# Health Compass - Production Requirements
+# Fixed for Streamlit Cloud deployment
 
-# AI/ML
-openai==1.6.1
-sentence-transformers==2.2.2
+# Core Framework
+streamlit>=1.29.0
+python-dotenv>=1.0.0
+
+# AI/ML - Compatible versions
+openai>=1.6.1
+sentence-transformers>=2.3.0
+transformers>=4.36.0
+torch>=2.0.0
+huggingface-hub>=0.20.0
 
 # Vector Database
-chromadb==0.4.18
+chromadb>=0.4.18
 
 # Data Processing
-pandas==2.1.4
+pandas>=2.1.4
 numpy>=1.24.0
 
 # Web Scraping
-beautifulsoup4==4.12.2
-requests==2.31.0
-lxml==4.9.3
+beautifulsoup4>=4.12.2
+requests>=2.31.0
+lxml>=4.9.3
 
 # Visualization
-plotly==5.18.0
+plotly>=5.18.0
 
 # Utilities
-tqdm==4.66.1
-python-dateutil==2.8.2
-pillow==10.1.0
-feedparser==6.0.10
-
-# Translation - FIXED VERSION
-deep-translator==1.11.4
-
-# Document Processing - Optional (for local use only)
-# PyPDF2==3.0.0
-# pytesseract==0.3.10
-
-# Additional
+tqdm>=4.66.1
+python-dateutil>=2.8.2
+pillow>=10.1.0
 pydantic>=2.0.0
-tenacity>=8.2.0
+
+# Translation (compatible alternative)
+deep-translator>=1.11.4
+
+# Optional - RSS feeds
+feedparser>=6.0.10
