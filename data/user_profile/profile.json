@@ -1,12 +1,12 @@
 {
-  "created_at": "2025-12-13T22:13:57.384953",
-  "updated_at": "2025-12-13T22:26:19.811225",
+  "created_at": "2025-12-14T00:59:40.663387",
+  "updated_at": "2025-12-14T01:01:14.417644",
   "is_setup_complete": true,
   "basic_info": {
-    "name": "Manish ",
-    "age": 25,
+    "name": "John ",
+    "age": 30,
     "gender": "Male",
-    "date_of_birth": "2015-12-13"
+    "date_of_birth": "2025-12-14"
   },
   "contact": {
     "email": "",
@@ -17,12 +17,10 @@
   "health_info": {
     "height": 170,
     "weight": 70,
-    "blood_type": null,
-    "allergies": [
-      "none"
-    ],
+    "blood_type": "B+",
+    "allergies": [],
     "chronic_conditions": [
-      "none"
+      "Hypertension"
     ],
     "family_history": [],
     "current_medications": [],
@@ -33,7 +31,7 @@
     "smoking": "never",
     "alcohol": "occasional",
     "exercise": "moderate",
-    "diet": "balanced"
+    "diet": "vegetarian"
   },
   "preferences": {
     "language": "English",
