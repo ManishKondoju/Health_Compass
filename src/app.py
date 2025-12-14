@@ -21,13 +21,32 @@ from src.utils.document_analyzer_enhanced import EnhancedDocumentAnalyzer
 from src.utils.specialist_matcher import SpecialistMatcher
 from src.utils.user_profile import UserProfile
 
-# Initialize user profile FIRST
 if 'user_profile' not in st.session_state:
     st.session_state.user_profile = UserProfile()
 
-# Check if onboarding is needed
+# Check if onboarding is needed - FIXED LOGIC
 if 'show_onboarding' not in st.session_state:
-    st.session_state.show_onboarding = not st.session_state.user_profile.is_setup_complete()
+    # On Streamlit Cloud (deployed), always show onboarding for new sessions
+    # Check if profile has meaningful data (not just defaults)
+    profile_data = st.session_state.user_profile.get_basic_info()
+    
+    # Profile is complete if name AND age are set
+    has_valid_profile = (
+        profile_data.get('name') and 
+        profile_data.get('name') != '' and
+        profile_data.get('age') and
+        profile_data.get('age') > 0
+    )
+    
+    st.session_state.show_onboarding = not has_valid_profile
+
+# Add a URL parameter to force onboarding (useful for testing)
+query_params = st.query_params
+if query_params.get("reset") == "true":
+    st.session_state.user_profile.reset_profile()
+    st.session_state.show_onboarding = True
+    st.query_params.clear()
+    st.rerun()
 
 # Initialize other session state
 if 'language' not in st.session_state:
