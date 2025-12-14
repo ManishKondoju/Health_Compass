@@ -1,0 +1,23 @@
+[
+  {
+    "id": "20251213_150237",
+    "date": "2025-12-13 15:02",
+    "symptoms": "Headache",
+    "severity": 5,
+    "notes": ""
+  },
+  {
+    "id": "20251213_153615",
+    "date": "2025-12-13 15:36",
+    "symptoms": "HIV",
+    "severity": 5,
+    "notes": ""
+  },
+  {
+    "id": "20251213_153625",
+    "date": "2025-12-13 15:36",
+    "symptoms": "Aids",
+    "severity": 5,
+    "notes": ""
+  }
+]

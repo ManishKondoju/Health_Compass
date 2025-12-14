@@ -1,0 +1,112 @@
+[
+  {
+    "id": "20251213171343",
+    "date": "2025-12-13T17:13:43.826244",
+    "date_display": "2025-12-13 17:13",
+    "symptoms": "Headache, cold, sore throat",
+    "severity": 5,
+    "triggers": [],
+    "relievers": [],
+    "treatments": [],
+    "treatment_effectiveness": null,
+    "notes": "Feel restless",
+    "day_of_week": "Saturday",
+    "time_of_day": "Afternoon"
+  },
+  {
+    "id": "20251213171438",
+    "date": "2025-12-13T17:14:38.214741",
+    "date_display": "2025-12-13 17:14",
+    "symptoms": "headache",
+    "severity": 5,
+    "triggers": [
+      "Lack of sleep",
+      "Weather change",
+      "Stress"
+    ],
+    "relievers": [
+      "Rest",
+      "Food",
+      "Water/hydration"
+    ],
+    "treatments": [
+      "Rest",
+      "Diet change"
+    ],
+    "treatment_effectiveness": "Made worse",
+    "notes": "",
+    "day_of_week": "Saturday",
+    "time_of_day": "Afternoon"
+  },
+  {
+    "id": "20251213175649",
+    "date": "2025-12-13T17:56:49.419590",
+    "date_display": "2025-12-13 17:56",
+    "symptoms": "Nose bleeding",
+    "severity": 10,
+    "triggers": [],
+    "relievers": [],
+    "treatments": [],
+    "treatment_effectiveness": null,
+    "notes": "",
+    "day_of_week": "Saturday",
+    "time_of_day": "Afternoon"
+  },
+  {
+    "id": "20251213175704",
+    "date": "2025-12-13T17:57:04.200319",
+    "date_display": "2025-12-13 17:57",
+    "symptoms": "Stomach ache",
+    "severity": 5,
+    "triggers": [
+      "Food"
+    ],
+    "relievers": [],
+    "treatments": [],
+    "treatment_effectiveness": null,
+    "notes": "",
+    "day_of_week": "Saturday",
+    "time_of_day": "Afternoon"
+  },
+  {
+    "id": "20251213175720",
+    "date": "2025-12-13T17:57:20.404521",
+    "date_display": "2025-12-13 17:57",
+    "symptoms": "Cold",
+    "severity": 5,
+    "triggers": [
+      "Weather",
+      "Stress"
+    ],
+    "relievers": [],
+    "treatments": [],
+    "treatment_effectiveness": null,
+    "notes": "",
+    "day_of_week": "Saturday",
+    "time_of_day": "Afternoon"
+  },
+  {
+    "id": "20251213182013",
+    "date": "2025-12-13T18:20:13.112003",
+    "date_display": "2025-12-13 18:20",
+    "symptoms": "Headache",
+    "severity": 5,
+    "triggers": [
+      "Weather",
+      "Food",
+      "Lack of sleep",
+      "Stress",
+      "Exercise"
+    ],
+    "relievers": [
+      "Rest"
+    ],
+    "treatments": [
+      "Home remedy"
+    ],
+    "treatment_effectiveness": "Made worse",
+    "notes": "",
+    "day_of_week": "Saturday",
+    "time_of_day": "Evening"
+  }
+]

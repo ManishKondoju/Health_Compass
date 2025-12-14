@@ -1,0 +1,122 @@
+{
+  "url": "https://www.cdc.gov/Other/disclaimer.html#exit-notification",
+  "title": "Website Disclaimers",
+  "content": [
+    {
+      "type": "li",
+      "text": "CDC iTunes Disclaimer"
+    },
+    {
+      "type": "li",
+      "text": "Endorsement Disclaimer — Pop-Up Advertisements"
+    },
+    {
+      "type": "li",
+      "text": "Exit Notification/Disclaimer Policy"
+    },
+    {
+      "type": "li",
+      "text": "Information Disclaimer"
+    },
+    {
+      "type": "li",
+      "text": "Section 508 Accessibility"
+    },
+    {
+      "type": "p",
+      "text": "This site uses the AddThis service to allow visitors to bookmark and share website content on a variety of social media sites. Visitors who use the AddThis service to share content do not need to register or provide any personal information. The AddThis service providers collect non-personal data, including the aggregate and summary statistics on browsers and usage patterns. AddThis also uses non-personal data to manage the service efficiently and diagnose server problems. Although AddThis offers some analytics and usage data to CDC, these reports do not include any personally identifiable information. The reports are password protected and only available to members of CDC and other designated staff requiring this information to perform their duties.  The AddThis Privacy policy is available at:https://www.oracle.com/legal/privacy/"
+    },
+    {
+      "type": "h2",
+      "text": "CDC iTunes Disclaimer"
+    },
+    {
+      "type": "p",
+      "text": "Limitation of Liability.The materials embodied in this software are “as-is” and without warranty of any kind, express, implied, or otherwise, including without limitation, any warranty of fitness for a particular purpose. In no event shall the Centers for Disease Control and Prevention (CDC) or the United States (U.S.) Government be liable to you or anyone else for any direct, special, incidental, indirect or consequential damages of any kind, or any damages whatsoever, including without limitation, loss of profit, loss of use, savings or revenue, or the claims of third parties, whether or not CDC or the U.S. Government has been advised of the possibility of such loss, however caused and on any theory of liability, arising out of or in connection with the possession, use or performance of this software."
+    },
+    {
+      "type": "p",
+      "text": "CDC is not responsible for confidentiality or any information shared by the owner or user of the device with other parties. CDC is not responsible for information shared with third parties through loss or theft of the device."
+    },
+    {
+      "type": "p",
+      "text": "This application is not intended to provide medical advice. Any questions regarding a user’s personal medical condition should be directed to the application user’s primary care physician."
+    },
+    {
+      "type": "p",
+      "text": "Use of trade names, commercial sources or private organizations is for identification only and does not imply endorsement by the U.S. Department of Health and Human Services and/or CDC."
+    },
+    {
+      "type": "h2",
+      "text": "Endorsement Disclaimer — Pop-Up Advertisements"
+    },
+    {
+      "type": "p",
+      "text": "When visiting our website, your Web browser may produce pop-up advertisements. These advertisements were most likely produced by other websites you visited or by third party software installed on your computer. The Centers for Disease Control and Prevention does not endorse or recommend products of services for which you may view a pop-up advertisement on your computer screen while visiting our site."
+    },
+    {
+      "type": "h2",
+      "text": "Exit Notification/Disclaimer Policy"
+    },
+    {
+      "type": "li",
+      "text": "Links with this icon () indicate that you are leaving a CDC website."
+    },
+    {
+      "type": "li",
+      "text": "The link may lead to a non-federal site, but it provides additional information that is consistent with the intended purpose of a federal site."
+    },
+    {
+      "type": "li",
+      "text": "The Department of Health and Human Services (HHS) cannot attest to the accuracy of a non-federal site."
+    },
+    {
+      "type": "li",
+      "text": "Linking to a non-federal site does not constitute an endorsement by HHS or any of its employees of the sponsors or the information and products presented on the site."
+    },
+    {
+      "type": "li",
+      "text": "You will be subject to the destination site’s privacy policy when you follow the link. For more information on exit notifications and disclaimers for non-federal websites, the following resources may be helpful:HHS Web standardsWebcontent.gov"
+    },
+    {
+      "type": "p",
+      "text": "Many of the images used on this website are licensed stock photography images that feature model(s). The models have no affiliation with The Centers for Disease Control and Prevention and the images are for illustrative purposes only."
+    },
+    {
+      "type": "h2",
+      "text": "Information Disclaimer"
+    },
+    {
+      "type": "p",
+      "text": "The information provided using this website is only intended to be general summary information to the public. It is not intended to take the place of either the written law or regulations."
+    },
+    {
+      "type": "p",
+      "text": "This site is maintained by the U.S. Government. It is protected by various provisions of Title 18, U.S. Code. Violations of Title 18 are subject to criminal prosecution in federal court."
+    },
+    {
+      "type": "p",
+      "text": "For site security purposes and to ensure that this service remains available to all users, we employ software programs to monitor traffic to identify unauthorized attempts to upload or change information, or otherwise cause damage. In the event of authorized law enforcement investigations, and pursuant to any required legal process, information from these sources may be used to help identify an individual."
+    },
+    {
+      "type": "h2",
+      "text": "Section 508 Accessibility"
+    },
+    {
+      "type": "p",
+      "text": "The CDC cannot verify the compliance of documents produced by outside agencies and companies. If you have problems accessing them, please contact the vendor directly orfile an accessibility reportand mention the name of the file, so we can assist you."
+    },
+    {
+      "type": "p",
+      "text": "CAPTCHA stands for “Completely Automated Public Turing test to tell Computers and Humans Apart” used to prevent automated software from completing a form or accessing a system."
+    },
+    {
+      "type": "h3",
+      "text": "CAPTCHA Accessibility"
+    },
+    {
+      "type": "p",
+      "text": "Many sites use the traditional CAPTCHA with distorted text or numbers that must be inputted by a website user. This method presents accessibility challenges making it difficult for persons using screen readers. As a result, CDC has chosen to use the Google reCaptcha to allow the user options to look at a new CAPTCHA challenge and or listen to the current challenge. The interface also allows the user to find out about the CAPTCHA."
+    }
+  ]
+}

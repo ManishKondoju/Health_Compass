@@ -1,0 +1,26 @@
+{
+  "url": "https://www.cdc.gov/media/",
+  "title": "CDC Newsroom",
+  "content": [
+    {
+      "type": "li",
+      "text": "CDC Immunization Schedule Adopts Individual-Based Decision-Making for COVID-19 and Standalone Vaccination for Chickenpox in ToddlersCDC updated updated its adult and child immunization schedules to apply individual-based decisions"
+    },
+    {
+      "type": "li",
+      "text": "CDC Current Outbreak ListSee a list of current outbreaks and outbreak-related resources."
+    },
+    {
+      "type": "li",
+      "text": "Media ResourcesCDC b-roll is produced by the United States Government and is in the public domain."
+    },
+    {
+      "type": "li",
+      "text": "Public Health Image Library"
+    },
+    {
+      "type": "li",
+      "text": "About CDCCDC's organization, leadership, mission, and more"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "url": "https://www.cdc.gov/cdc-info/index.html",
+  "title": "CDC-INFO",
+  "content": [
+    {
+      "type": "p",
+      "text": "CDC on Demand has been retired and publications are no longer available to order."
+    },
+    {
+      "type": "li",
+      "text": "Get Answers to Common Travel Questions"
+    },
+    {
+      "type": "li",
+      "text": "CDC Resources in other languages"
+    },
+    {
+      "type": "li",
+      "text": "CDC Division of Media RelationsMedia request form for Centers for Disease Control and Prevention."
+    },
+    {
+      "type": "li",
+      "text": "Request a SpeakerRequesting a CDC speaker instruction and form"
+    },
+    {
+      "type": "li",
+      "text": "NHSN Help DeskCDC’s National Healthcare Safety Network is the nation’s most widely used healthcare-associated infe..."
+    },
+    {
+      "type": "li",
+      "text": "SAMS NHSN User FAQsCDC’s National Healthcare Safety Network is the nation’s most widely used healthcare-associated infe..."
+    }
+  ]
+}

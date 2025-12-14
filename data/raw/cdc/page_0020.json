@@ -1,0 +1,46 @@
+{
+  "url": "https://www.cdc.gov/other/nondiscrimination.html",
+  "title": "CDC Nondiscrimination Notice",
+  "content": [
+    {
+      "type": "p",
+      "text": "The Centers for Disease Control and Prevention complies with applicable Federal civil rights laws and does not discriminate on the basis of race, color, national origin, age, disability, or sex. CDC does not exclude people or treat them differently because of race, color, national origin, age, disability, or sex."
+    },
+    {
+      "type": "li",
+      "text": "Provides free aids and services to people with disabilities to communicate effectively with us, such as:Qualified sign language interpretersWritten information in other formats (large print, audio, accessible electronic formats, other formats)"
+    },
+    {
+      "type": "li",
+      "text": "Qualified sign language interpreters"
+    },
+    {
+      "type": "li",
+      "text": "Written information in other formats (large print, audio, accessible electronic formats, other formats)"
+    },
+    {
+      "type": "li",
+      "text": "Provides free language services to people whose primary language is not English, such as:Qualified interpretersInformation written in other languages"
+    },
+    {
+      "type": "li",
+      "text": "Qualified interpreters"
+    },
+    {
+      "type": "li",
+      "text": "Information written in other languages"
+    },
+    {
+      "type": "p",
+      "text": "If you need these services, contact CDC at 800-232-4636."
+    },
+    {
+      "type": "p",
+      "text": "If you believe that CDC has failed to provide these services or discriminated in another way on the basis of race, color, national origin, age, disability, or sex, you can file a grievance with the U.S. Department of Health and Human Services, Office for Civil Rights, electronically through theOffice for Civil Rights Complaint Portal, or by mail or phone at:"
+    },
+    {
+      "type": "p",
+      "text": "U.S. Department of Health and Human Services200 Independence Avenue, SWRoom 509F, HHH BuildingWashington, D.C. 202011-800-368-1019, 800-537-7697 (TDD)"
+    }
+  ]
+}

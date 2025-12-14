@@ -1,0 +1,18 @@
+{
+  "url": "https://www.cdc.gov/health-topics.html",
+  "title": "Explore Topics",
+  "content": [
+    {
+      "type": "p",
+      "text": "Find diseases and conditions; healthy living; workplace safety; environmental health; injury, violence and safety, global health and more."
+    },
+    {
+      "type": "h3",
+      "text": "What is the Health Topics A-Z Index?"
+    },
+    {
+      "type": "p",
+      "text": "The Health Topics A-Z Index lists topics with relevance to a broad cross-section of CDC.gov’s audiences. The items are representative of popular topics, frequent inquiries, or have critical importance to CDC’s public health mission. The index will continue to evolve as additional topics are added."
+    }
+  ]
+}

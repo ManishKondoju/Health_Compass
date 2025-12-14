@@ -1,0 +1,66 @@
+[
+  {
+    "id": "20251213175821",
+    "name": "Aspirin",
+    "dosage": "500mg",
+    "frequency": "Three times daily",
+    "times_per_day": 3,
+    "specific_times": [
+      "08:00",
+      "13:00",
+      "20:00"
+    ],
+    "with_food": false,
+    "instructions": "",
+    "total_quantity": 20,
+    "quantity_remaining": 14,
+    "refill_date": "2026-01-12",
+    "start_date": "2025-12-13",
+    "active": true,
+    "side_effects_reported": [],
+    "created_at": "2025-12-13T17:58:21.350803",
+    "needs_refill": false
+  },
+  {
+    "id": "20251213175827",
+    "name": "Aspirin",
+    "dosage": "500mg",
+    "frequency": "Three times daily",
+    "times_per_day": 3,
+    "specific_times": [
+      "08:00",
+      "13:00",
+      "20:00"
+    ],
+    "with_food": false,
+    "instructions": "",
+    "total_quantity": 20,
+    "quantity_remaining": 17,
+    "refill_date": "2026-01-12",
+    "start_date": "2025-12-13",
+    "active": true,
+    "side_effects_reported": [],
+    "created_at": "2025-12-13T17:58:27.641114",
+    "needs_refill": false
+  },
+  {
+    "id": "20251213182101",
+    "name": "Paracetomol",
+    "dosage": "500mg",
+    "frequency": "Once daily",
+    "times_per_day": 1,
+    "specific_times": [
+      "08:00"
+    ],
+    "with_food": false,
+    "instructions": "For fever",
+    "total_quantity": 26,
+    "quantity_remaining": 24,
+    "refill_date": "2026-01-12",
+    "start_date": "2025-12-13",
+    "active": true,
+    "side_effects_reported": [],
+    "created_at": "2025-12-13T18:21:01.546588",
+    "needs_refill": false
+  }
+]
