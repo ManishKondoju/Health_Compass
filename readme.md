@@ -11,7 +11,7 @@
 
 *Empowering Health Literacy Through Evidence-Based AI*
 
-[🎥 Watch Demo](YOUR_YOUTUBE_LINK) • [🚀 Try Live App](YOUR_DEPLOYED_LINK) • [📚 Documentation](#documentation)
+[🎥 Watch Demo](https://youtu.be/WQMATMY7fCk) • [🚀 Try Live App](https://healthcompass22.streamlit.app/) • [📚 Documentation](#documentation)
 
 </div>
 
