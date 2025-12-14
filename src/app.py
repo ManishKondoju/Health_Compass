@@ -649,149 +649,233 @@ else:
     ])
     
     # ==================== TAB: DASHBOARD ====================
+    
     with tab_dash:
-        st.markdown("### 🏠 Your Health Dashboard")
+    st.markdown("### 🏠 Your Health Dashboard")
+    
+    profile = st.session_state.user_profile
+    summary = profile.get_profile_summary()
+    basic = profile.get_basic_info()
+    health = profile.get_health_info()
+    lifestyle = profile.get_lifestyle()
+    
+    st.markdown(f"## Welcome back, {summary['name']}! 👋")
+    st.caption(f"Last updated: {datetime.now().strftime('%B %d, %Y')}")
+    
+    st.markdown("---")
+    
+    # Key metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Age", f"{summary['age']} years" if summary['age'] else "Not set")
+    
+    with col2:
+        if summary['bmi']:
+            st.metric("BMI", summary['bmi'], delta=summary['bmi_category'], delta_color="off")
+        else:
+            st.metric("BMI", "Not calculated")
+    
+    with col3:
+        st.metric("Active Conditions", summary['conditions_count'])
+    
+    with col4:
+        risk_color = {'Low': '🟢', 'Moderate': '🟡', 'High': '🔴'}
+        st.metric("Lifestyle Risk", f"{risk_color.get(summary['lifestyle_risk'], '⚪')} {summary['lifestyle_risk']}")
+    
+    st.markdown("---")
+    
+    col_left, col_right = st.columns([2, 1])
+    
+    with col_left:
+        st.markdown("### 📊 Health Overview")
         
-        profile = st.session_state.user_profile
-        summary = profile.get_profile_summary()
-        basic = profile.get_basic_info()
-        health = profile.get_health_info()
-        lifestyle = profile.get_lifestyle()
+        with st.expander("🩺 Medical Information", expanded=True):
+            col_a, col_b = st.columns(2)
+            
+            with col_a:
+                if health.get('height') and health.get('weight'):
+                    st.write(f"**Height:** {health['height']} cm")
+                    st.write(f"**Weight:** {health['weight']} kg")
+                else:
+                    st.info("Add height/weight to calculate BMI")
+                
+                if health.get('blood_type'):
+                    st.write(f"**Blood Type:** {health['blood_type']}")
+            
+            with col_b:
+                allergies = health.get('allergies', [])
+                if allergies:
+                    st.write(f"**Allergies:** {len(allergies)}")
+                    for allergy in allergies[:3]:
+                        st.caption(f"• {allergy}")
+                    if len(allergies) > 3:
+                        st.caption(f"• +{len(allergies)-3} more")
+                else:
+                    st.info("No allergies recorded")
         
-        st.markdown(f"## Welcome back, {summary['name']}! 👋")
-        st.caption(f"Last updated: {datetime.now().strftime('%B %d, %Y')}")
-        
-        st.markdown("---")
-        
-        # Key metrics
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("Age", f"{summary['age']} years" if summary['age'] else "Not set")
-        
-        with col2:
-            if summary['bmi']:
-                st.metric("BMI", summary['bmi'], delta=summary['bmi_category'], delta_color="off")
+        with st.expander("🏥 Chronic Conditions"):
+            conditions = health.get('chronic_conditions', [])
+            if conditions:
+                for condition in conditions:
+                    st.write(f"• {condition}")
             else:
-                st.metric("BMI", "Not calculated")
+                st.info("No conditions recorded")
         
-        with col3:
-            st.metric("Active Conditions", summary['conditions_count'])
+        with st.expander("💊 Current Medications"):
+            medications = health.get('current_medications', [])
+            if medications:
+                for med in medications:
+                    st.write(f"**{med.get('name')}**")
+                    st.caption(f"{med.get('dosage', '')} - {med.get('frequency', '')}")
+            else:
+                st.info("No medications recorded")
+    
+    with col_right:
+        st.markdown("### ⚡ Quick Actions")
         
-        with col4:
-            risk_color = {'Low': '🟢', 'Moderate': '🟡', 'High': '🔴'}
-            st.metric("Lifestyle Risk", f"{risk_color.get(summary['lifestyle_risk'], '⚪')} {summary['lifestyle_risk']}")
+        if st.button("📝 Log Symptom", use_container_width=True):
+            st.info("👉 Go to Symptoms tab")
+        
+        if st.button("📄 Analyze Document", use_container_width=True):
+            st.info("👉 Go to Documents tab")
+        
+        if st.button("💬 Ask AI", use_container_width=True):
+            st.info("👉 Go to AI Chat tab")
         
         st.markdown("---")
         
-        col_left, col_right = st.columns([2, 1])
+        st.markdown("### 🏃 Lifestyle")
         
-        with col_left:
-            st.markdown("### 📊 Health Overview")
-            
-            with st.expander("🩺 Medical Information", expanded=True):
-                col_a, col_b = st.columns(2)
-                
-                with col_a:
-                    if health.get('height') and health.get('weight'):
-                        st.write(f"**Height:** {health['height']} cm")
-                        st.write(f"**Weight:** {health['weight']} kg")
-                    else:
-                        st.info("Add height/weight to calculate BMI")
-                    
-                    if health.get('blood_type'):
-                        st.write(f"**Blood Type:** {health['blood_type']}")
-                
-                with col_b:
-                    allergies = health.get('allergies', [])
-                    if allergies:
-                        st.write(f"**Allergies:** {len(allergies)}")
-                        for allergy in allergies[:3]:
-                            st.caption(f"• {allergy}")
-                    else:
-                        st.info("No allergies recorded")
-            
-            with st.expander("🏥 Chronic Conditions"):
-                conditions = health.get('chronic_conditions', [])
-                if conditions:
-                    for condition in conditions:
-                        st.write(f"• {condition}")
-                else:
-                    st.info("No conditions recorded")
-            
-            with st.expander("💊 Current Medications"):
-                medications = health.get('current_medications', [])
-                if medications:
-                    for med in medications:
-                        st.write(f"**{med.get('name')}**")
-                        st.caption(f"{med.get('dosage', '')} - {med.get('frequency', '')}")
-                else:
-                    st.info("No medications recorded")
+        lifestyle_icons = {
+            'smoking': {'never': '✅ Non-smoker', 'former': '⚠️ Former', 'current': '🚫 Smoker'},
+            'exercise': {'sedentary': '😴 Sedentary', 'light': '🚶 Light', 
+                        'moderate': '🏃 Moderate', 'active': '💪 Active'},
+            'alcohol': {'none': '✅ None', 'occasional': '🍷 Occasional', 
+                       'moderate': '⚠️ Moderate', 'heavy': '🚫 Heavy'}
+        }
         
-        with col_right:
-            st.markdown("### ⚡ Quick Actions")
-            
-            if st.button("📝 Log Symptom", use_container_width=True):
-                st.info("👉 Go to Symptoms tab")
-            
-            if st.button("📄 Analyze Document", use_container_width=True):
-                st.info("👉 Go to Documents tab")
-            
-            if st.button("💬 Ask AI", use_container_width=True):
-                st.info("👉 Go to AI Chat tab")
-            
-            st.markdown("---")
-            
-            st.markdown("### 🏃 Lifestyle")
-            
-            lifestyle_icons = {
-                'smoking': {'never': '✅ Non-smoker', 'former': '⚠️ Former', 'current': '🚫 Smoker'},
-                'exercise': {'sedentary': '😴 Sedentary', 'light': '🚶 Light', 
-                            'moderate': '🏃 Moderate', 'active': '💪 Active'},
-                'alcohol': {'none': '✅ None', 'occasional': '🍷 Occasional', 
-                           'moderate': '⚠️ Moderate', 'heavy': '🚫 Heavy'}
-            }
-            
-            st.write(lifestyle_icons['smoking'].get(lifestyle.get('smoking'), ''))
-            st.write(lifestyle_icons['exercise'].get(lifestyle.get('exercise'), ''))
-            st.write(lifestyle_icons['alcohol'].get(lifestyle.get('alcohol'), ''))
-            
-            st.markdown("---")
-            
+        st.write(lifestyle_icons['smoking'].get(lifestyle.get('smoking', 'never'), '✅ Non-smoker'))
+        st.write(lifestyle_icons['exercise'].get(lifestyle.get('exercise', 'sedentary'), '😴 Sedentary'))
+        st.write(lifestyle_icons['alcohol'].get(lifestyle.get('alcohol', 'none'), '✅ None'))
+        
+        st.markdown("---")
+        
+        # Profile management buttons
+        col_edit1, col_edit2 = st.columns(2)
+        
+        with col_edit1:
             if st.button("⚙️ Edit Profile", use_container_width=True):
                 st.session_state.show_profile_editor = True
                 st.rerun()
         
-        if st.session_state.get('show_profile_editor', False):
-            st.markdown("---")
-            st.markdown("## ⚙️ Edit Profile")
-            
-            edit_tab = st.radio("Edit:", ["Basic", "Health", "Lifestyle", "Close"], horizontal=True)
-            
-            if edit_tab == "Basic":
-                with st.form("edit_basic"):
-                    name = st.text_input("Name", value=basic.get('name', ''))
-                    age = st.number_input("Age", value=basic.get('age', 30), min_value=1)
-                    
-                    if st.form_submit_button("Save"):
-                        profile.update_basic_info(name=name, age=age)
-                        st.success("✅ Updated!")
-                        st.rerun()
-            
-            elif edit_tab == "Health":
-                with st.form("edit_health"):
-                    height = st.number_input("Height (cm)", value=health.get('height', 170))
-                    weight = st.number_input("Weight (kg)", value=health.get('weight', 70))
-                    
-                    if st.form_submit_button("Save"):
-                        profile.update_health_info(height=height, weight=weight)
-                        st.success("✅ Updated!")
-                        st.rerun()
-            
-            elif edit_tab == "Close":
-                st.session_state.show_profile_editor = False
+        with col_edit2:
+            if st.button("🔄 Reset Profile", use_container_width=True):
+                st.session_state.user_profile.reset_profile()
+                st.session_state.show_onboarding = True
+                st.session_state.chat_history = []
+                st.success("Profile reset! Reloading...")
+                import time
+                time.sleep(1)
                 st.rerun()
     
+    # FIXED: Profile Editor with working Lifestyle section
+    if st.session_state.get('show_profile_editor', False):
+        st.markdown("---")
+        st.markdown("## ⚙️ Edit Profile")
+        
+        edit_tab = st.radio("What would you like to edit?", 
+                           ["Basic Info", "Health Info", "Lifestyle", "Close Editor"], 
+                           horizontal=True,
+                           key="edit_tab_selector")
+        
+        if edit_tab == "Basic Info":
+            st.markdown("### 📋 Basic Information")
+            
+            with st.form("edit_basic"):
+                name = st.text_input("Full Name", value=basic.get('name', ''))
+                age = st.number_input("Age", value=basic.get('age', 30), min_value=1, max_value=120)
+                gender = st.selectbox("Gender", 
+                                     ["Male", "Female", "Other", "Prefer not to say"],
+                                     index=["Male", "Female", "Other", "Prefer not to say"].index(basic.get('gender', 'Male')) if basic.get('gender') in ["Male", "Female", "Other", "Prefer not to say"] else 0)
+                
+                if st.form_submit_button("💾 Save Changes", use_container_width=True):
+                    profile.update_basic_info(name=name, age=age, gender=gender)
+                    st.success("✅ Profile updated!")
+                    st.session_state.show_profile_editor = False
+                    st.rerun()
+        
+        elif edit_tab == "Health Info":
+            st.markdown("### 🏥 Health Information")
+            
+            with st.form("edit_health"):
+                col_h1, col_h2 = st.columns(2)
+                
+                with col_h1:
+                    height = st.number_input("Height (cm)", 
+                                            value=health.get('height', 170), 
+                                            min_value=50, 
+                                            max_value=250)
+                    weight = st.number_input("Weight (kg)", 
+                                            value=health.get('weight', 70), 
+                                            min_value=20, 
+                                            max_value=300)
+                
+                with col_h2:
+                    blood_type = st.selectbox("Blood Type", 
+                                             ["Unknown", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+                                             index=["Unknown", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].index(health.get('blood_type', 'Unknown')) if health.get('blood_type') in ["Unknown", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] else 0)
+                
+                if st.form_submit_button("💾 Save Changes", use_container_width=True):
+                    profile.update_health_info(
+                        height=height, 
+                        weight=weight,
+                        blood_type=blood_type if blood_type != "Unknown" else None
+                    )
+                    st.success("✅ Profile updated!")
+                    st.session_state.show_profile_editor = False
+                    st.rerun()
+        
+        elif edit_tab == "Lifestyle":
+            st.markdown("### 🏃 Lifestyle Information")
+            
+            with st.form("edit_lifestyle"):
+                smoking = st.selectbox("Smoking Status", 
+                                      ["Never", "Former smoker", "Current smoker"],
+                                      index=["never", "former", "current"].index(lifestyle.get('smoking', 'never')))
+                
+                alcohol = st.selectbox("Alcohol Consumption",
+                                      ["None", "Occasional", "Moderate", "Heavy"],
+                                      index=["none", "occasional", "moderate", "heavy"].index(lifestyle.get('alcohol', 'none')))
+                
+                exercise = st.selectbox("Exercise Level",
+                                       ["Sedentary", "Light", "Moderate", "Active"],
+                                       index=["sedentary", "light", "moderate", "active"].index(lifestyle.get('exercise', 'sedentary')))
+                
+                diet = st.selectbox("Dietary Preference",
+                                   ["Balanced", "Vegetarian", "Vegan", "Other"],
+                                   index=["balanced", "vegetarian", "vegan", "other"].index(lifestyle.get('diet', 'balanced')))
+                
+                if st.form_submit_button("💾 Save Changes", use_container_width=True):
+                    # Map display values to internal values
+                    smoking_map = {"Never": "never", "Former smoker": "former", "Current smoker": "current"}
+                    alcohol_map = {"None": "none", "Occasional": "occasional", "Moderate": "moderate", "Heavy": "heavy"}
+                    exercise_map = {"Sedentary": "sedentary", "Light": "light", "Moderate": "moderate", "Active": "active"}
+                    diet_map = {"Balanced": "balanced", "Vegetarian": "vegetarian", "Vegan": "vegan", "Other": "other"}
+                    
+                    profile.update_lifestyle(
+                        smoking=smoking_map.get(smoking, 'never'),
+                        alcohol=alcohol_map.get(alcohol, 'none'),
+                        exercise=exercise_map.get(exercise, 'sedentary'),
+                        diet=diet_map.get(diet, 'balanced')
+                    )
+                    st.success("✅ Lifestyle updated!")
+                    st.session_state.show_profile_editor = False
+                    st.rerun()
+        
+        elif edit_tab == "Close Editor":
+            st.session_state.show_profile_editor = False
+            st.rerun()
     # ==================== TAB: Q&A SEARCH ====================
     with tab_qa:
         st.markdown("### 🔍 Medical Information Search")
