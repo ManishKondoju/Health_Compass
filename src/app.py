@@ -17,414 +17,19 @@ if str(project_root) not in sys.path:
 from src.rag.rag_pipeline import HealthCompassRAG
 from src.utils.symptom_tracker import SymptomTracker
 from src.utils.healthcare_assistant import HealthcareAssistant
+from src.utils.document_analyzer_enhanced import EnhancedDocumentAnalyzer
+from src.utils.specialist_matcher import SpecialistMatcher
+from src.utils.user_profile import UserProfile
 
-# Page config
-st.set_page_config(
-    page_title="Health Compass | AI Medical Assistant",
-    page_icon="🏥",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# Initialize user profile FIRST
+if 'user_profile' not in st.session_state:
+    st.session_state.user_profile = UserProfile()
 
-# Replace the st.markdown CSS section (lines 29-244) with this:
+# Check if onboarding is needed
+if 'show_onboarding' not in st.session_state:
+    st.session_state.show_onboarding = not st.session_state.user_profile.is_setup_complete()
 
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    
-    .stApp {
-        background: linear-gradient(135deg, #F0F4F8 0%, #E2E8F0 100%);
-    }
-    
-    .main .block-container {
-        padding: 1.5rem 2.5rem;
-        max-width: 1600px;
-    }
-    
-    /* Fix all text contrast issues */
-    h1, h2, h3, h4, h5, h6, p, span, div, label {
-        color: #1E293B !important;
-    }
-    
-    /* Header */
-    .app-header {
-        background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
-        padding: 2rem 2.5rem;
-        margin: -1.5rem -2.5rem 2.5rem -2.5rem;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 10px 30px rgba(30, 64, 175, 0.2);
-    }
-    
-    .app-header h1 {
-        color: white !important;
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-    
-    .app-header p {
-        color: rgba(255, 255, 255, 0.95) !important;
-        font-size: 1.1rem;
-        margin: 0.5rem 0 0 0;
-    }
-    
-    /* Cards */
-    .card {
-        background: white;
-        border-radius: 20px;
-        padding: 2.5rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .card:hover {
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        transform: translateY(-4px);
-    }
-    
-    .card h3 {
-        color: #1E293B !important;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0 0 1.5rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    
-    .card h4 {
-        color: #334155 !important;
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin: 0 0 1rem 0;
-    }
-    
-    /* Markdown headings - CRITICAL FIX */
-    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
-        color: #0F172A !important;
-        font-weight: 700 !important;
-    }
-    
-    .main h3 {
-        font-size: 1.5rem !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    /* Labels and captions - CRITICAL FIX */
-    .stTextArea label, .stTextInput label, .stSelectbox label, 
-    .stFileUploader label, .stRadio label, .stSlider label {
-        color: #1E293B !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-    }
-    
-    .stMarkdown p, .stMarkdown div {
-        color: #334155 !important;
-    }
-    
-    [data-testid="stMarkdownContainer"] p {
-        color: #475569 !important;
-        font-size: 0.95rem;
-    }
-    
-    /* Caption text */
-    .stCaption, [data-testid="stCaptionContainer"] {
-        color: #64748B !important;
-        font-size: 0.875rem !important;
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-        color: white !important;
-        border: none;
-        border-radius: 12px;
-        padding: 0.8rem 2.5rem;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
-    }
-    
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
-    }
-    
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0.5rem;
-        background: white;
-        padding: 1rem 1.5rem;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 2rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background: transparent;
-        color: #475569 !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        padding: 0.75rem 1.8rem;
-        border-radius: 10px;
-        transition: all 0.2s ease;
-    }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background: #F1F5F9;
-        color: #3B82F6 !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
-        color: white !important;
-        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-    }
-    
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1E293B 0%, #334155 100%);
-    }
-    
-    [data-testid="stSidebar"] * {
-        color: rgba(255, 255, 255, 0.95) !important;
-    }
-    
-    [data-testid="stSidebar"] h2 {
-        color: white !important;
-        font-weight: 700 !important;
-    }
-    
-    [data-testid="stSidebar"] .stButton > button {
-        background: rgba(255, 255, 255, 0.1);
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-    }
-    
-    [data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-    
-    [data-testid="stSidebar"] .stCaption {
-        color: rgba(255, 255, 255, 0.7) !important;
-    }
-    
-    /* Inputs */
-    .stTextArea textarea, .stTextInput input {
-        border: 2px solid #E2E8F0;
-        border-radius: 12px;
-        padding: 1rem;
-        font-size: 1rem;
-        color: #1E293B !important;
-        background: white;
-    }
-    
-    .stTextArea textarea:focus, .stTextInput input:focus {
-        border-color: #3B82F6;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    }
-    
-    .stTextArea textarea::placeholder, .stTextInput input::placeholder {
-        color: #94A3B8 !important;
-    }
-    
-    /* Chat messages */
-    .stChatMessage {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-    
-    .stChatMessage p {
-        color: #334155 !important;
-    }
-    
-    /* Metrics */
-    [data-testid="stMetric"] {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-    
-    [data-testid="stMetricValue"] {
-        color: #3B82F6 !important;
-        font-size: 2.5rem !important;
-        font-weight: 800 !important;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        color: #64748B !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Info/Warning/Success/Error boxes */
-    .stAlert {
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-    }
-    
-    .stAlert p, .stAlert div {
-        color: #1E293B !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Warning box specific */
-    [data-baseweb="notification"][kind="warning"] {
-        background: #FEF3C7 !important;
-        border-left: 4px solid #F59E0B !important;
-    }
-    
-    [data-baseweb="notification"][kind="warning"] p {
-        color: #92400E !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Info box */
-    [data-baseweb="notification"][kind="info"] {
-        background: #DBEAFE !important;
-        border-left: 4px solid #3B82F6 !important;
-    }
-    
-    [data-baseweb="notification"][kind="info"] p {
-        color: #1E3A8A !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Success box */
-    [data-baseweb="notification"][kind="success"] {
-        background: #D1FAE5 !important;
-        border-left: 4px solid #10B981 !important;
-    }
-    
-    [data-baseweb="notification"][kind="success"] p {
-        color: #065F46 !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Error box */
-    [data-baseweb="notification"][kind="error"] {
-        background: #FEE2E2 !important;
-        border-left: 4px solid #EF4444 !important;
-    }
-    
-    [data-baseweb="notification"][kind="error"] p {
-        color: #991B1B !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Clean up */
-    #MainMenu, footer {visibility: hidden;}
-    
-    /* Emergency */
-    .emergency-box {
-        background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
-        border: 3px solid #EF4444;
-        border-radius: 16px;
-        padding: 2rem;
-        margin: 2rem 0;
-    }
-    
-    .emergency-box h2 {
-        color: #DC2626 !important;
-        font-size: 2rem !important;
-        font-weight: 800 !important;
-    }
-    
-    .emergency-box h3 {
-        color: #DC2626 !important;
-    }
-    
-    .emergency-box p {
-        color: #4A5568 !important;
-    }
-    
-    /* Source cards */
-    .source-card {
-        background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
-        border: 1px solid #BAE6FD;
-        border-left: 4px solid #0EA5E9;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-    }
-    
-    .source-card:hover {
-        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
-    }
-    
-    .source-card strong {
-        color: #0C4A6E !important;
-    }
-    
-    .source-card a {
-        color: #0EA5E9 !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Expander */
-    .streamlit-expanderHeader {
-        background: white;
-        border-radius: 10px;
-        color: #1E293B !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Radio buttons */
-    .stRadio label {
-        color: #334155 !important;
-    }
-    
-    /* Slider */
-    .stSlider label {
-        color: #1E293B !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Form */
-    [data-testid="stForm"] {
-        background: transparent;
-        border: none;
-    }
-    
-    /* File uploader */
-    [data-testid="stFileUploader"] {
-        background: white;
-        border: 2px dashed #CBD5E1;
-        border-radius: 12px;
-        padding: 2rem;
-    }
-    
-    [data-testid="stFileUploader"] label {
-        color: #1E293B !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Download button */
-    .stDownloadButton button {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
-        color: white !important;
-    }
-    
-    .stDownloadButton button:hover {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Session state
+# Initialize other session state
 if 'language' not in st.session_state:
     st.session_state.language = 'English'
 if 'chat_history' not in st.session_state:
@@ -438,809 +43,970 @@ def load_rag():
     except:
         return None
 
-# Language translations (simple implementation)
-translations = {
-    'English': {
-        'header': 'Health Compass',
-        'tagline': 'AI-Powered Medical Assistant',
-        'search_placeholder': 'Ask any health question...',
-        'search_btn': 'Search',
-        'emergency': 'Emergency',
-        'call_911': 'Call 911'
-    },
-    'Spanish': {
-        'header': 'Brújula de Salud',
-        'tagline': 'Asistente Médico con IA',
-        'search_placeholder': 'Haga cualquier pregunta de salud...',
-        'search_btn': 'Buscar',
-        'emergency': 'Emergencia',
-        'call_911': 'Llamar al 911'
-    },
-    'Chinese': {
-        'header': '健康指南针',
-        'tagline': 'AI医疗助手',
-        'search_placeholder': '提出任何健康问题...',
-        'search_btn': '搜索',
-        'emergency': '紧急情况',
-        'call_911': '拨打911'
-    },
-    'French': {
-        'header': 'Boussole Santé',
-        'tagline': 'Assistant Médical IA',
-        'search_placeholder': 'Posez une question santé...',
-        'search_btn': 'Rechercher',
-        'emergency': 'Urgence',
-        'call_911': 'Appeler le 911'
-    }
-}
-
-t = translations[st.session_state.language]
-
-# Header
-st.markdown(f"""
-<div class='app-header'>
-    <h1>🏥 {t['header']}</h1>
-    <p>{t['tagline']}</p>
-</div>
-""", unsafe_allow_html=True)
-
-# Sidebar
-with st.sidebar:
-    st.markdown("## 🌍 Language")
+# ==================== ONBOARDING FLOW ====================
+if st.session_state.show_onboarding:
+    st.set_page_config(
+        page_title="Welcome to Health Compass",
+        page_icon="🏥",
+        layout="wide"
+    )
     
-    lang = st.selectbox("", ["English", "Spanish", "Chinese", "French"], 
-                       index=["English", "Spanish", "Chinese", "French"].index(st.session_state.language),
-                       label_visibility="collapsed")
-    
-    if lang != st.session_state.language:
-        st.session_state.language = lang
-        st.rerun()
-    
-    st.markdown("---")
-    
-    st.markdown(f"## 🚨 {t['emergency']}")
-    st.error(f"**{t['call_911']}**")
-    st.caption("☎️ Poison: 1-800-222-1222")
-    st.caption("🧠 Crisis: 988")
-    
-    st.markdown("---")
-    
-    st.markdown("## 📊 System")
-    
-    rag = load_rag()
-    if rag:
-        try:
-            stats = rag.vector_db.get_stats()
-            st.success("✓ Online")
-            st.caption(f"{stats['total_documents']} documents")
-        except:
-            st.warning("Limited")
-    else:
-        st.error("Offline")
-    
-    st.markdown("---")
-    
-    # Quick medication tracker in sidebar
-    assistant = HealthcareAssistant()
-    meds = assistant.get_tracked_medications()
-    
-    if meds:
-        st.markdown("## 💊 Tracked Meds")
-        for med in meds[-3:]:
-            st.caption(f"• {med['name']}")
-
-# Main tabs
-tab1, tab2, tab3, tab4 = st.tabs([
-    "🔍 Q&A Search",
-    "📄 Document Analyzer",
-    "📊 Symptom Tracker",
-    "💬 AI Assistant"
-])
-
-# ==================== TAB 1: Q&A SEARCH ====================
-with tab1:
-    st.markdown("### 🔍 Medical Information Search")
-    st.caption("Ask questions and get evidence-based answers from trusted medical sources")
-    
-    st.warning("⚠️ Educational purposes only. Not medical advice. Call 911 for emergencies.")
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        query = st.text_area(
-            "Ask your health question:",
-            height=120,
-            placeholder=t['search_placeholder'],
-            key="search_query"
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .stApp {
+            background: linear-gradient(135deg, #F0F4F8 0%, #E2E8F0 100%);
+        }
+        
+        .onboarding-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .onboarding-header h1 {
+            color: white !important;
+            font-size: 3rem;
+            margin: 0;
+        }
+        .onboarding-header p {
+            color: rgba(255,255,255,0.9) !important;
+            font-size: 1.2rem;
+        }
+        .step-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+        }
+        
+        h1, h2, h3, h4, p, label, span, div {
+            color: #1E293B !important;
+        }
+        
+        /* Fix all inputs */
+        .stTextInput input, .stNumberInput input, .stSelectbox select,
+        .stTextArea textarea {
+            background: white !important;
+            color: #1E293B !important;
+            border: 2px solid #E2E8F0 !important;
+        }
+        
+        /* Fix dropdown specifically */
+        .stSelectbox > div > div {
+            background: white !important;
+            color: #1E293B !important;
+        }
+        
+        [data-baseweb="select"] {
+            background: white !important;
+        }
+        
+        [data-baseweb="select"] > div {
+            background: white !important;
+            color: #1E293B !important;
+        }
+        
+        #MainMenu, footer {visibility: hidden;}
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class='onboarding-header'>
+        <h1>👋 Welcome to Health Compass!</h1>
+        <p>Let's set up your personalized health profile</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Multi-step form
+    if 'onboarding_step' not in st.session_state:
+        st.session_state.onboarding_step = 1
+    
+    profile = st.session_state.user_profile
+    
+    # Progress bar
+    progress = st.session_state.onboarding_step / 4
+    st.progress(progress)
+    st.caption(f"Step {st.session_state.onboarding_step} of 4")
+    
+    # STEP 1: Basic Information
+    if st.session_state.onboarding_step == 1:
+        st.markdown('<div class="step-card">', unsafe_allow_html=True)
+        st.markdown("## 📋 Step 1: Basic Information")
+        st.write("Help us personalize your experience")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            name = st.text_input("Full Name *", placeholder="John Doe")
+            age = st.number_input("Age *", min_value=1, max_value=120, value=30)
+        
+        with col2:
+            gender = st.selectbox("Gender *", ["Select...", "Male", "Female", "Other", "Prefer not to say"])
+            dob = st.date_input("Date of Birth", value=None)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        if st.button("Continue →", use_container_width=True, type="primary"):
+            if name and age and gender != "Select...":
+                profile.update_basic_info(
+                    name=name,
+                    age=age,
+                    gender=gender if gender != "Prefer not to say" else None,
+                    dob=dob.isoformat() if dob else None
+                )
+                st.session_state.onboarding_step = 2
+                st.rerun()
+            else:
+                st.error("Please fill in all required fields (*)")
+    
+    # STEP 2: Health Information
+    elif st.session_state.onboarding_step == 2:
+        st.markdown('<div class="step-card">', unsafe_allow_html=True)
+        st.markdown("## 🏥 Step 2: Health Information")
+        st.write("This helps us provide accurate health insights")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            height = st.number_input("Height (cm)", min_value=50, max_value=250, value=170)
+            weight = st.number_input("Weight (kg)", min_value=20, max_value=300, value=70)
+        
+        with col2:
+            blood_type = st.selectbox("Blood Type", 
+                ["Unknown", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+        
+        st.markdown("**Allergies** (optional)")
+        allergies_input = st.text_area(
+            "List any allergies (one per line)",
+            placeholder="Penicillin\nPeanuts\nLatex",
+            height=100
         )
         
-        col_b1, col_b2 = st.columns([2, 1])
+        st.markdown("**Chronic Conditions** (optional)")
+        conditions_input = st.text_area(
+            "List any chronic conditions (one per line)",
+            placeholder="Diabetes\nHypertension\nAsthma",
+            height=100
+        )
         
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        col_b1, col_b2 = st.columns(2)
+        with col_b1:
+            if st.button("← Back", use_container_width=True):
+                st.session_state.onboarding_step = 1
+                st.rerun()
+        with col_b2:
+            if st.button("Continue →", use_container_width=True, type="primary"):
+                profile.update_health_info(
+                    height=height,
+                    weight=weight,
+                    blood_type=blood_type if blood_type != "Unknown" else None
+                )
+                
+                if allergies_input:
+                    for allergy in allergies_input.strip().split('\n'):
+                        if allergy.strip():
+                            profile.add_allergy(allergy.strip())
+                
+                if conditions_input:
+                    for condition in conditions_input.strip().split('\n'):
+                        if condition.strip():
+                            profile.add_condition(condition.strip())
+                
+                st.session_state.onboarding_step = 3
+                st.rerun()
+    
+    # STEP 3: Lifestyle
+    elif st.session_state.onboarding_step == 3:
+        st.markdown('<div class="step-card">', unsafe_allow_html=True)
+        st.markdown("## 🏃 Step 3: Lifestyle")
+        st.write("Understanding your lifestyle helps provide better recommendations")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            smoking = st.selectbox("Smoking Status", 
+                ["Never", "Former smoker", "Current smoker"])
+            
+            alcohol = st.selectbox("Alcohol Consumption",
+                ["None", "Occasional (1-2 drinks/week)", "Moderate (3-7 drinks/week)", "Heavy (8+ drinks/week)"])
+        
+        with col2:
+            exercise = st.selectbox("Exercise Level",
+                ["Sedentary (little/no exercise)", 
+                 "Light (1-2 days/week)",
+                 "Moderate (3-5 days/week)",
+                 "Active (6-7 days/week)"])
+            
+            diet = st.selectbox("Dietary Preference",
+                ["Balanced/Regular", "Vegetarian", "Vegan", "Other"])
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        col_b1, col_b2 = st.columns(2)
+        with col_b1:
+            if st.button("← Back", use_container_width=True):
+                st.session_state.onboarding_step = 2
+                st.rerun()
+        with col_b2:
+            if st.button("Continue →", use_container_width=True, type="primary"):
+                smoking_map = {"Never": "never", "Former smoker": "former", "Current smoker": "current"}
+                alcohol_map = {"None": "none", "Occasional (1-2 drinks/week)": "occasional", 
+                              "Moderate (3-7 drinks/week)": "moderate", "Heavy (8+ drinks/week)": "heavy"}
+                exercise_map = {"Sedentary (little/no exercise)": "sedentary", "Light (1-2 days/week)": "light",
+                               "Moderate (3-5 days/week)": "moderate", "Active (6-7 days/week)": "active"}
+                diet_map = {"Balanced/Regular": "balanced", "Vegetarian": "vegetarian", "Vegan": "vegan", "Other": "other"}
+                
+                profile.update_lifestyle(
+                    smoking=smoking_map[smoking],
+                    alcohol=alcohol_map[alcohol],
+                    exercise=exercise_map[exercise],
+                    diet=diet_map[diet]
+                )
+                
+                st.session_state.onboarding_step = 4
+                st.rerun()
+    
+    # STEP 4: Preferences & Complete
+    elif st.session_state.onboarding_step == 4:
+        st.markdown('<div class="step-card">', unsafe_allow_html=True)
+        st.markdown("## ⚙️ Step 4: Preferences")
+        st.write("Final step - customize your experience")
+        
+        location = st.text_input("Location (City, State)", 
+            placeholder="Boston, MA",
+            help="Used to find nearby healthcare facilities")
+        
+        language = st.selectbox("Preferred Language",
+            ["English", "Spanish", "Chinese", "French"])
+        
+        st.markdown("---")
+        st.info("💡 You can update your profile anytime from the Dashboard")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        col_b1, col_b2 = st.columns(2)
+        with col_b1:
+            if st.button("← Back", use_container_width=True):
+                st.session_state.onboarding_step = 3
+                st.rerun()
+        with col_b2:
+            if st.button("🎉 Complete Setup", use_container_width=True, type="primary"):
+                profile.update_preferences(language=language, location=location)
+                profile.mark_setup_complete()
+                st.session_state.show_onboarding = False
+                st.session_state.language = language
+                st.balloons()
+                st.success("✅ Profile setup complete! Welcome to Health Compass!")
+                import time
+                time.sleep(1)
+                st.rerun()
+
+# ==================== MAIN APP ====================
+else:
+    st.set_page_config(
+        page_title="Health Compass | AI Medical Assistant",
+        page_icon="🏥",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    
+    # FIXED CSS - ALL CONTRAST ISSUES RESOLVED
+    st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .stApp {
+            background: linear-gradient(135deg, #F0F4F8 0%, #E2E8F0 100%);
+        }
+        
+        .main .block-container {
+            padding: 1.5rem 2.5rem;
+            max-width: 1600px;
+        }
+        
+        /* Fix all text */
+        h1, h2, h3, h4, h5, h6, p, span, div, label {
+            color: #1E293B !important;
+        }
+        
+        /* CRITICAL FIX: Dropdown/Select visibility */
+        .stSelectbox > div > div {
+            background: white !important;
+            color: #1E293B !important;
+        }
+        
+        [data-baseweb="select"] {
+            background: white !important;
+        }
+        
+        [data-baseweb="select"] > div {
+            background: white !important;
+            color: #1E293B !important;
+        }
+        
+        [data-baseweb="select"] span {
+            color: #1E293B !important;
+        }
+        
+        /* Dropdown menu items */
+        [role="listbox"] {
+            background: white !important;
+        }
+        
+        [role="option"] {
+            background: white !important;
+            color: #1E293B !important;
+        }
+        
+        [role="option"]:hover {
+            background: #F1F5F9 !important;
+            color: #3B82F6 !important;
+        }
+        
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+            padding: 2rem 2.5rem;
+            margin: -1.5rem -2.5rem 2.5rem -2.5rem;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 10px 30px rgba(30, 64, 175, 0.2);
+        }
+        
+        .app-header h1 {
+            color: white !important;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+        }
+        
+        .app-header p {
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-size: 1.1rem;
+            margin: 0.5rem 0 0 0;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E2E8F0;
+        }
+        
+        .card h3, .card h4 {
+            color: #1E293B !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Inputs */
+        .stTextArea textarea, .stTextInput input, .stNumberInput input {
+            border: 2px solid #E2E8F0 !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            background: white !important;
+            color: #1E293B !important;
+        }
+        
+        .stTextArea textarea::placeholder, .stTextInput input::placeholder {
+            color: #94A3B8 !important;
+        }
+        
+        /* Labels */
+        .stTextArea label, .stTextInput label, .stSelectbox label, 
+        .stNumberInput label, .stFileUploader label, .stRadio label {
+            color: #1E293B !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+        }
+        
+        /* Buttons */
+        .stButton > button {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white !important;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 2.5rem;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 0.5rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            background: transparent;
+            color: #475569 !important;
+            font-weight: 600 !important;
+            padding: 0.75rem 1.8rem;
+            border-radius: 10px;
+        }
+        
+        .stTabs [data-baseweb="tab"]:hover {
+            background: #F1F5F9;
+            color: #3B82F6 !important;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+            color: white !important;
+        }
+        
+        /* Sidebar */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #1E293B 0%, #334155 100%);
+        }
+        
+        [data-testid="stSidebar"] * {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+        
+        [data-testid="stSidebar"] h2 {
+            color: white !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Metrics */
+        [data-testid="stMetric"] {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        [data-testid="stMetricValue"] {
+            color: #3B82F6 !important;
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #64748B !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Alerts */
+        [data-baseweb="notification"] p {
+            color: #1E293B !important;
+            font-weight: 500 !important;
+        }
+        
+        /* File uploader */
+        [data-testid="stFileUploader"] {
+            background: white;
+            border: 2px dashed #CBD5E1;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        
+        [data-testid="stFileUploader"] label {
+            color: #1E293B !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Source cards */
+        .source-card {
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+            border: 1px solid #BAE6FD;
+            border-left: 4px solid #0EA5E9;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        #MainMenu, footer {visibility: hidden;}
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Language translations
+    translations = {
+        'English': {'header': 'Health Compass', 'tagline': 'AI-Powered Medical Assistant',
+                   'search_placeholder': 'Ask any health question...', 'search_btn': 'Search',
+                   'emergency': 'Emergency', 'call_911': 'Call 911'},
+        'Spanish': {'header': 'Brújula de Salud', 'tagline': 'Asistente Médico con IA',
+                   'search_placeholder': 'Haga cualquier pregunta...', 'search_btn': 'Buscar',
+                   'emergency': 'Emergencia', 'call_911': 'Llamar al 911'},
+        'Chinese': {'header': '健康指南针', 'tagline': 'AI医疗助手',
+                   'search_placeholder': '提出任何健康问题...', 'search_btn': '搜索',
+                   'emergency': '紧急情况', 'call_911': '拨打911'},
+        'French': {'header': 'Boussole Santé', 'tagline': 'Assistant Médical IA',
+                  'search_placeholder': 'Posez une question...', 'search_btn': 'Rechercher',
+                  'emergency': 'Urgence', 'call_911': 'Appeler le 911'}
+    }
+    
+    t = translations[st.session_state.language]
+    
+    # Header
+    st.markdown(f"""
+    <div class='app-header'>
+        <h1>🏥 {t['header']}</h1>
+        <p>{t['tagline']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Sidebar with Profile
+    with st.sidebar:
+        # Profile Summary
+        profile = st.session_state.user_profile
+        summary = profile.get_profile_summary()
+        
+        st.markdown("## 👤 Profile")
+        st.write(f"**{summary['name']}**")
+        st.caption(f"{summary['age']} years • {summary.get('gender', 'N/A')}")
+        
+        if summary['bmi']:
+            st.caption(f"BMI: {summary['bmi']} ({summary['bmi_category']})")
+        
+        if summary['conditions_count'] > 0:
+            st.caption(f"📋 {summary['conditions_count']} condition(s)")
+        
+        st.markdown("---")
+        
+        st.markdown("## 🌍 Language")
+        lang = st.selectbox("", ["English", "Spanish", "Chinese", "French"], 
+                           index=["English", "Spanish", "Chinese", "French"].index(st.session_state.language),
+                           label_visibility="collapsed")
+        
+        if lang != st.session_state.language:
+            st.session_state.language = lang
+            st.rerun()
+        
+        st.markdown("---")
+        
+        st.markdown(f"## 🚨 {t['emergency']}")
+        st.error(f"**{t['call_911']}**")
+        st.caption("☎️ Poison: 1-800-222-1222")
+        st.caption("🧠 Crisis: 988")
+        
+        st.markdown("---")
+        
+        st.markdown("## 📊 System")
+        rag = load_rag()
+        if rag:
+            try:
+                stats = rag.vector_db.get_stats()
+                st.success("✓ Online")
+                st.caption(f"{stats['total_documents']} documents")
+            except:
+                st.warning("Limited")
+        else:
+            st.error("Offline")
+    
+    # Main tabs - Dashboard first
+    tab_dash, tab_qa, tab_doc, tab_symptom, tab_ai = st.tabs([
+        "🏠 Dashboard",
+        "🔍 Q&A",
+        "📄 Documents",
+        "📊 Symptoms",
+        "💬 AI Chat"
+    ])
+    
+    # ==================== TAB: DASHBOARD ====================
+    with tab_dash:
+        st.markdown("### 🏠 Your Health Dashboard")
+        
+        profile = st.session_state.user_profile
+        summary = profile.get_profile_summary()
+        basic = profile.get_basic_info()
+        health = profile.get_health_info()
+        lifestyle = profile.get_lifestyle()
+        
+        st.markdown(f"## Welcome back, {summary['name']}! 👋")
+        st.caption(f"Last updated: {datetime.now().strftime('%B %d, %Y')}")
+        
+        st.markdown("---")
+        
+        # Key metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Age", f"{summary['age']} years" if summary['age'] else "Not set")
+        
+        with col2:
+            if summary['bmi']:
+                st.metric("BMI", summary['bmi'], delta=summary['bmi_category'], delta_color="off")
+            else:
+                st.metric("BMI", "Not calculated")
+        
+        with col3:
+            st.metric("Active Conditions", summary['conditions_count'])
+        
+        with col4:
+            risk_color = {'Low': '🟢', 'Moderate': '🟡', 'High': '🔴'}
+            st.metric("Lifestyle Risk", f"{risk_color.get(summary['lifestyle_risk'], '⚪')} {summary['lifestyle_risk']}")
+        
+        st.markdown("---")
+        
+        col_left, col_right = st.columns([2, 1])
+        
+        with col_left:
+            st.markdown("### 📊 Health Overview")
+            
+            with st.expander("🩺 Medical Information", expanded=True):
+                col_a, col_b = st.columns(2)
+                
+                with col_a:
+                    if health.get('height') and health.get('weight'):
+                        st.write(f"**Height:** {health['height']} cm")
+                        st.write(f"**Weight:** {health['weight']} kg")
+                    else:
+                        st.info("Add height/weight to calculate BMI")
+                    
+                    if health.get('blood_type'):
+                        st.write(f"**Blood Type:** {health['blood_type']}")
+                
+                with col_b:
+                    allergies = health.get('allergies', [])
+                    if allergies:
+                        st.write(f"**Allergies:** {len(allergies)}")
+                        for allergy in allergies[:3]:
+                            st.caption(f"• {allergy}")
+                    else:
+                        st.info("No allergies recorded")
+            
+            with st.expander("🏥 Chronic Conditions"):
+                conditions = health.get('chronic_conditions', [])
+                if conditions:
+                    for condition in conditions:
+                        st.write(f"• {condition}")
+                else:
+                    st.info("No conditions recorded")
+            
+            with st.expander("💊 Current Medications"):
+                medications = health.get('current_medications', [])
+                if medications:
+                    for med in medications:
+                        st.write(f"**{med.get('name')}**")
+                        st.caption(f"{med.get('dosage', '')} - {med.get('frequency', '')}")
+                else:
+                    st.info("No medications recorded")
+        
+        with col_right:
+            st.markdown("### ⚡ Quick Actions")
+            
+            if st.button("📝 Log Symptom", use_container_width=True):
+                st.info("👉 Go to Symptoms tab")
+            
+            if st.button("📄 Analyze Document", use_container_width=True):
+                st.info("👉 Go to Documents tab")
+            
+            if st.button("💬 Ask AI", use_container_width=True):
+                st.info("👉 Go to AI Chat tab")
+            
+            st.markdown("---")
+            
+            st.markdown("### 🏃 Lifestyle")
+            
+            lifestyle_icons = {
+                'smoking': {'never': '✅ Non-smoker', 'former': '⚠️ Former', 'current': '🚫 Smoker'},
+                'exercise': {'sedentary': '😴 Sedentary', 'light': '🚶 Light', 
+                            'moderate': '🏃 Moderate', 'active': '💪 Active'},
+                'alcohol': {'none': '✅ None', 'occasional': '🍷 Occasional', 
+                           'moderate': '⚠️ Moderate', 'heavy': '🚫 Heavy'}
+            }
+            
+            st.write(lifestyle_icons['smoking'].get(lifestyle.get('smoking'), ''))
+            st.write(lifestyle_icons['exercise'].get(lifestyle.get('exercise'), ''))
+            st.write(lifestyle_icons['alcohol'].get(lifestyle.get('alcohol'), ''))
+            
+            st.markdown("---")
+            
+            if st.button("⚙️ Edit Profile", use_container_width=True):
+                st.session_state.show_profile_editor = True
+                st.rerun()
+        
+        if st.session_state.get('show_profile_editor', False):
+            st.markdown("---")
+            st.markdown("## ⚙️ Edit Profile")
+            
+            edit_tab = st.radio("Edit:", ["Basic", "Health", "Lifestyle", "Close"], horizontal=True)
+            
+            if edit_tab == "Basic":
+                with st.form("edit_basic"):
+                    name = st.text_input("Name", value=basic.get('name', ''))
+                    age = st.number_input("Age", value=basic.get('age', 30), min_value=1)
+                    
+                    if st.form_submit_button("Save"):
+                        profile.update_basic_info(name=name, age=age)
+                        st.success("✅ Updated!")
+                        st.rerun()
+            
+            elif edit_tab == "Health":
+                with st.form("edit_health"):
+                    height = st.number_input("Height (cm)", value=health.get('height', 170))
+                    weight = st.number_input("Weight (kg)", value=health.get('weight', 70))
+                    
+                    if st.form_submit_button("Save"):
+                        profile.update_health_info(height=height, weight=weight)
+                        st.success("✅ Updated!")
+                        st.rerun()
+            
+            elif edit_tab == "Close":
+                st.session_state.show_profile_editor = False
+                st.rerun()
+    
+    # ==================== TAB: Q&A SEARCH ====================
+    with tab_qa:
+        st.markdown("### 🔍 Medical Information Search")
+        st.warning("⚠️ Educational only. Not medical advice. Call 911 for emergencies.")
+        
+        query = st.text_area("Ask your health question:", height=120, 
+                            placeholder=t['search_placeholder'], key="search_query")
+        
+        col_b1, col_b2 = st.columns([2, 1])
         with col_b1:
             search_btn = st.button(f"🔍 {t['search_btn']}", use_container_width=True, type="primary")
-        
         with col_b2:
             if st.button("Clear", use_container_width=True):
                 st.session_state.search_query = ''
                 st.rerun()
         
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("### 💡 Tips")
-        st.info("""
-**Ask about:**
-• Symptoms
-• Conditions  
-• Treatments
-• Prevention
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    if search_btn and query:
-        rag = load_rag()
-        
-        if rag:
-            # Translate query if not English
-            if st.session_state.language != 'English':
-                with st.spinner("Translating..."):
-                    translate_prompt = f"Translate this to English: {query}"
-                    query_en = rag.llm.generate([{"role": "user", "content": translate_prompt}], max_tokens=200)
-                    st.caption(f"🌍 Translated: {query_en}")
-            else:
-                query_en = query
-            
-            with st.spinner("Searching..."):
-                result = rag.query(query_en, n_results=5)
-            
-            # Check emergency
-            if result['is_emergency']:
-                st.markdown(f"""
-                <div class='emergency-box'>
-                    <h2>🚨 MEDICAL EMERGENCY</h2>
-                    <h3 style="color: #DC2626;">{t['call_911'].upper()}</h3>
-                    <p style="color: #4A5568;">Do not delay. Seek emergency care immediately.</p>
-                </div>
-                """, unsafe_allow_html=True)
-                st.stop()
-            
-            # Display answer
-            st.markdown("---")
-            
-            answer_text = result['answer']
-            
-            # Translate answer if needed
-            if st.session_state.language != 'English':
-                with st.spinner("Translating answer..."):
-                    translate_answer_prompt = f"Translate this medical information to {st.session_state.language}. Keep it clear and accurate:\n\n{answer_text}"
-                    answer_text = rag.llm.generate([{"role": "user", "content": translate_answer_prompt}], max_tokens=2000)
-            
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.markdown("### 📋 Answer")
-            st.write(answer_text)
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Sources
-            if result['sources']:
-                st.markdown("### 📚 Sources")
-                
-                for i, source in enumerate(result['sources'], 1):
-                    st.markdown(f"""
-                    <div class='source-card'>
-                        <strong>{i}. {source.get('source', 'Unknown')}</strong> ✓<br>
-                        {source.get('title', 'Untitled')}<br>
-                        <a href="{source.get('url', '#')}" target="_blank">View source →</a>
-                    </div>
-                    """, unsafe_allow_html=True)
-            
-            # Download
-            st.download_button(
-                "📥 Download Answer",
-                f"{query}\n\n{answer_text}",
-                f"answer_{datetime.now().strftime('%Y%m%d')}.txt",
-                use_container_width=True
-            )
-
-# ==================== TAB 2: DOCUMENT ANALYZER ====================
-with tab2:
-    st.markdown("### 📄 Medical Document Analyzer")
-    st.caption("Upload lab results, prescriptions, or discharge papers - AI explains in plain language")
-    
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("#### Upload Your Medical Document")
-    
-    uploaded_file = st.file_uploader(
-        "Choose a file",
-        type=['pdf', 'png', 'jpg', 'jpeg', 'txt'],
-        help="Upload lab results, prescriptions, discharge summaries, etc."
-    )
-    
-    if uploaded_file:
-        st.success(f"✅ Uploaded: {uploaded_file.name}")
-        
-        # Display file
-        if uploaded_file.type.startswith('image'):
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Your document", width=600)
-        
-        st.markdown("---")
-        
-        # Analysis options
-        analysis_type = st.radio("What would you like to know?", [
-            "📋 Explain everything in simple terms",
-            "🔬 Highlight abnormal values",
-            "❓ Generate questions for my doctor",
-            "📝 Summarize key findings",
-            "💊 List medications mentioned"
-        ])
-        
-        if st.button("🤖 Analyze Document", use_container_width=True, type="primary"):
+        if search_btn and query:
             rag = load_rag()
-            
             if rag:
-                with st.spinner("🤖 AI is analyzing your document..."):
+                with st.spinner("Searching..."):
+                    result = rag.query(query, n_results=5)
+                
+                if result.get('is_emergency'):
+                    st.error("🚨 MEDICAL EMERGENCY - CALL 911 IMMEDIATELY")
+                    st.stop()
+                
+                st.markdown("---")
+                st.markdown("### 📋 Answer")
+                st.write(result['answer'])
+                
+                if result.get('sources'):
+                    st.markdown("### 📚 Sources")
+                    for i, source in enumerate(result['sources'], 1):
+                        st.markdown(f"""
+                        <div class='source-card'>
+                            <strong>{i}. {source.get('source', 'Unknown')}</strong><br>
+                            {source.get('title', '')}<br>
+                            <a href="{source.get('url', '#')}" target="_blank">View →</a>
+                        </div>
+                        """, unsafe_allow_html=True)
+    
+    # ==================== TAB: DOCUMENT ANALYZER ====================
+    with tab_doc:
+        st.markdown("### 📄 Medical Document Analyzer")
+        
+        rag_system = load_rag()
+        analyzer_doc = EnhancedDocumentAnalyzer(rag_system=rag_system)
+        
+        col_up1, col_up2 = st.columns([2, 1])
+        
+        with col_up1:
+            st.markdown("#### 📤 Upload Document")
+            uploaded_file = st.file_uploader("Choose a file", type=['pdf', 'png', 'jpg', 'jpeg', 'txt'])
+        
+        with col_up2:
+            st.markdown("#### 👤 Gender")
+            # Auto-fill from profile
+            profile = st.session_state.user_profile
+            profile_gender = profile.get_basic_info().get('gender')
+            default_gender = profile_gender if profile_gender in ['Male', 'Female'] else 'Not specified'
+            
+            gender = st.selectbox("For reference ranges", 
+                                 ["Not specified", "Male", "Female"],
+                                 index=["Not specified", "Male", "Female"].index(default_gender) if default_gender in ["Not specified", "Male", "Female"] else 0)
+            
+            if profile_gender and gender != "Not specified":
+                st.caption(f"✅ Using profile: {profile_gender}")
+        
+        if uploaded_file:
+            st.success(f"✅ Uploaded: **{uploaded_file.name}**")
+            
+            analysis_type = st.radio("Analysis type:", 
+                ["🔬 Lab Values Analysis", "📋 Plain English Explanation", 
+                 "⚠️ Abnormal Values Only", "❓ Doctor Questions", "💊 Medication List"],
+                horizontal=False)
+            
+            if st.button("🤖 Analyze Document", type="primary", use_container_width=True):
+                with st.spinner("Analyzing..."):
+                    file_bytes = uploaded_file.getvalue()
+                    gender_param = None if gender == "Not specified" else gender
                     
-                    # Read file content
-                    if uploaded_file.type == 'text/plain':
-                        content = uploaded_file.read().decode('utf-8')
-                    elif uploaded_file.type == 'application/pdf':
-                        # For PDF, would use PyPDF2 or similar
-                        st.info("📄 For this educational version, please copy text from PDF and paste below")
-                        content = st.text_area("Paste PDF text here:", height=200)
-                    elif uploaded_file.type.startswith('image'):
-                        # For images, would use OCR (pytesseract)
-                        st.info("📷 For this educational version, please type the text from the image below")
-                        content = st.text_area("Type text from image:", height=200)
-                    else:
-                        content = ""
-                    
-                    if content:
-                        # Create analysis prompt based on selection
-                        if "Explain everything" in analysis_type:
-                            prompt = f"""Analyze this medical document and explain in simple, plain language:
-
-{content[:3000]}
-
-Provide:
-1. What type of document is this?
-2. Key information explained simply
-3. Important medical terms defined
-4. What the numbers/results mean
-5. Any concerning findings to discuss with doctor
-
-Use simple language a non-medical person can understand."""
-
-                        elif "abnormal values" in analysis_type:
-                            prompt = f"""Analyze this medical document and identify abnormal values:
-
-{content[:3000]}
-
-For each test/value:
-1. Name of test
-2. Your value
-3. Normal range
-4. Is it abnormal? (High/Low/Normal)
-5. What it might mean (educational, not diagnosis)
-
-Highlight anything that needs doctor's attention."""
-
-                        elif "questions for doctor" in analysis_type:
-                            prompt = f"""Based on this medical document:
-
-{content[:3000]}
-
-Generate 10 specific questions the patient should ask their doctor about these results.
-Make them practical and focused on understanding the results and next steps."""
-
-                        elif "Summarize" in analysis_type:
-                            prompt = f"""Summarize this medical document in simple terms:
-
-{content[:3000]}
-
-Provide:
-1. Document type
-2. Main findings (3-5 key points)
-3. Bottom line: What does this mean?
-4. Recommended next steps
-
-Keep it brief and clear."""
-
-                        else:  # List medications
-                            prompt = f"""List all medications mentioned in this document:
-
-{content[:3000]}
-
-For each medication:
-1. Name
-2. Dosage
-3. Frequency/instructions
-4. What it's used for (brief)
-
-Format as a clear list."""
-
-                        # Get AI analysis
-                        analysis = rag.llm.generate([
-                            {"role": "system", "content": "You are a medical education assistant helping patients understand medical documents."},
-                            {"role": "user", "content": prompt}
-                        ], temperature=0.2, max_tokens=2000)
+                    if "Lab Values" in analysis_type:
+                        result = analyzer_doc.analyze_document(file_bytes, uploaded_file.type, gender_param)
                         
-                        # Translate if needed
-                        if st.session_state.language != 'English':
-                            translate_prompt = f"Translate to {st.session_state.language}:\n\n{analysis}"
-                            analysis = rag.llm.generate([{"role": "user", "content": translate_prompt}], max_tokens=2500)
-                        
-                        st.markdown("---")
-                        st.markdown("### 🤖 AI Analysis")
-                        st.write(analysis)
-                        
-                        st.caption("⚠️ This is educational analysis. Always discuss results with your healthcare provider.")
-                        
-                        # Download analysis
-                        st.markdown("---")
-                        
-                        download_content = f"""MEDICAL DOCUMENT ANALYSIS
-{'='*70}
-
-Document: {uploaded_file.name}
-Analyzed: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
-Analysis Type: {analysis_type}
-
-{'='*70}
-
-AI ANALYSIS:
-
-{analysis}
-
-{'='*70}
-
-ORIGINAL CONTENT:
-
-{content[:2000]}
-
-{'='*70}
-Generated by Health Compass Document Analyzer
-For educational purposes - Discuss with healthcare provider
-{'='*70}
-"""
-                        
-                        st.download_button(
-                            "📥 Download Complete Analysis",
-                            download_content,
-                            f"analysis_{uploaded_file.name}_{datetime.now().strftime('%Y%m%d')}.txt",
-                            use_container_width=True
-                        )
-                    else:
-                        st.warning("Please provide document text for analysis")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ==================== TAB 3: SYMPTOM TRACKER ====================
-with tab3:
-    st.markdown("### 📊 Symptom Tracker with AI Insights")
-    st.caption("Log symptoms and let AI discover patterns you might miss")
-    
-    tracker = SymptomTracker()
-    
-    col1, col2 = st.columns([1.2, 1])
-    
-    with col1:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("#### 📝 Log Symptom")
-        
-        with st.form("symptom_form", clear_on_submit=True):
-            symptom_desc = st.text_input("What are you experiencing?",
-                                        placeholder="e.g., Headache, Stomach pain, Fatigue")
-            
-            severity = st.slider("How severe? (1=Mild, 10=Severe)", 1, 10, 5)
-            
-            notes = st.text_area("Additional details (optional)", height=80,
-                                placeholder="What were you doing? What makes it better/worse?")
-            
-            if st.form_submit_button("💾 Log Symptom", use_container_width=True):
-                if symptom_desc:
-                    tracker.log_symptom(symptom_desc, severity, notes)
-                    st.success("✅ Symptom logged!")
-                    st.rerun()
-                else:
-                    st.error("Please describe your symptom")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("#### 📈 Quick Stats")
-        
-        insights = tracker.get_ai_insights()
-        
-        if insights:
-            st.metric("Entries", insights['total_entries'])
-            st.metric("Avg Severity", f"{insights['average_severity']}/10")
-            st.metric("Trend", insights['trend'].capitalize())
+                        if 'error' not in result:
+                            st.success("✅ Analysis complete!")
+                            
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Total Tests", result['total_tests'])
+                            with col2:
+                                st.metric("Abnormal", result['abnormal_count'])
+                            with col3:
+                                st.metric("Normal", result['total_tests'] - result['abnormal_count'])
+                            
+                            st.markdown("---")
+                            st.markdown(result['report'])
         else:
-            st.info("Log 3+ symptoms to see stats")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.info("👆 Upload a medical document to analyze")
     
-    # AI Insights (3+ entries)
-    if insights:
-        st.markdown("---")
-        st.markdown("## 🤖 AI Pattern Analysis")
+    # ==================== TAB: SYMPTOM TRACKER ====================
+    with tab_symptom:
+        st.markdown("### 📊 Symptom Tracker")
         
-        col_i1, col_i2 = st.columns(2)
+        tracker = SymptomTracker()
+        specialist_matcher = SpecialistMatcher(rag_system=load_rag())
         
-        with col_i1:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.markdown("#### 📅 When do they occur?")
-            
-            day_df = pd.DataFrame(list(insights['day_pattern'].items()), columns=['Day', 'Count'])
-            
-            fig = px.bar(day_df, x='Day', y='Count', title="By Day of Week",
-                        color='Count', color_continuous_scale='Blues')
-            fig.update_layout(showlegend=False, height=300)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            st.info(f"💡 Most symptoms on **{insights['most_common_day']}s**")
-            
-            if insights['weekday_vs_weekend']['pattern'] == 'weekday-dominant':
-                st.warning("⚠️ **Pattern:** Symptoms mostly on weekdays - could be stress-related")
-            elif insights['weekday_vs_weekend']['pattern'] == 'weekend-dominant':
-                st.info("💡 **Pattern:** Symptoms mostly on weekends")
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+        col1, col2 = st.columns([1.2, 1])
         
-        with col_i2:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.markdown("#### 🕐 What time of day?")
+        with col1:
+            st.markdown("#### 📝 Log Symptom")
             
-            time_df = pd.DataFrame(list(insights['time_pattern'].items()), columns=['Period', 'Count'])
-            
-            fig = px.pie(time_df, values='Count', names='Period', title="By Time of Day")
-            fig.update_layout(height=300)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            st.info(f"💡 Most symptoms in the **{insights['most_common_time']}**")
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Get AI interpretation
-        st.markdown("---")
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("### 🤖 AI Interpretation of Your Patterns")
-        
-        if st.button("Generate AI Insights", use_container_width=True):
-            rag = load_rag()
-            
-            if rag:
-                with st.spinner("AI is analyzing your symptom patterns..."):
-                    
-                    insight_data = tracker.generate_insight_text()
-                    
-                    prompt = f"""As a medical education assistant, analyze these symptom tracking patterns:
-
-{insight_data}
-
-Provide helpful insights:
-1. What patterns are notable? (timing, frequency, trends)
-2. Possible correlations or triggers to consider
-3. What should the patient monitor or track additionally?
-4. Should they see a doctor? When and why?
-5. Questions to ask their doctor about these patterns
-
-Be specific and actionable. Remind this is educational, not diagnosis."""
-                    
-                    ai_insights = rag.llm.generate([
-                        {"role": "system", "content": "You are a medical education assistant."},
-                        {"role": "user", "content": prompt}
-                    ], temperature=0.3, max_tokens=1500)
-                    
-                    # Translate if needed
-                    if st.session_state.language != 'English':
-                        translate_prompt = f"Translate to {st.session_state.language}:\n\n{ai_insights}"
-                        ai_insights = rag.llm.generate([{"role": "user", "content": translate_prompt}], max_tokens=2000)
-                    
-                    st.write(ai_insights)
-                    
-                    st.caption("💡 Share these insights with your doctor at your next visit")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # View entries
-    entries = tracker.get_all_symptoms()
-    
-    if entries:
-        st.markdown("---")
-        st.markdown("### 📜 Your Symptom History")
-        
-        for entry in reversed(entries[-10:]):
-            with st.expander(f"📅 {entry['date_display']} • {entry['symptom']} ({entry['severity']}/10)"):
-                st.write(f"**Severity:** {entry['severity']}/10")
-                st.write(f"**Day:** {entry['day_of_week']} • **Time:** {entry['time_of_day']}")
-                if entry.get('notes'):
-                    st.write(f"**Notes:** {entry['notes']}")
+            with st.form("symptom_form", clear_on_submit=True):
+                symptom = st.text_input("Symptom:", placeholder="e.g., Headache")
+                severity = st.slider("Severity:", 1, 10, 5)
+                notes = st.text_area("Notes:", height=80, placeholder="Details...")
                 
-                if st.button("Delete", key=f"del_{entry['id']}", use_container_width=True):
-                    tracker.delete_entry(entry['id'])
-                    st.success("Deleted")
-                    st.rerun()
+                if st.form_submit_button("💾 Log", use_container_width=True):
+                    if symptom:
+                        tracker.log_symptom(symptom, severity, notes)
+                        st.success("✅ Logged!")
+                        st.rerun()
         
-        st.markdown("---")
+        with col2:
+            st.markdown("#### 📈 Stats")
+            insights = tracker.get_ai_insights()
+            
+            if insights:
+                st.metric("Entries", insights['total_entries'])
+                st.metric("Avg Severity", f"{insights['average_severity']}/10")
+            else:
+                st.info("Log 3+ symptoms")
         
-        # Export
-        export_text = f"""SYMPTOM TRACKER LOG
-{'='*70}
-
-Total Entries: {len(entries)}
-Period: {entries[0]['date_display']} to {entries[-1]['date_display']}
-
-SYMPTOM LOG:
-
-"""
-        for entry in entries:
-            export_text += f"""
-Date: {entry['date_display']} ({entry['day_of_week']}, {entry['time_of_day']})
-Symptom: {entry['symptom']}
-Severity: {entry['severity']}/10
-Notes: {entry.get('notes', 'None')}
-{'─'*70}
-"""
-        
-        if insights:
-            export_text += f"""
-
-PATTERN ANALYSIS:
-Most common: {insights['most_common_symptom']}
-Average severity: {insights['average_severity']}/10
-Trend: {insights['trend']}
-Most common day: {insights['most_common_day']}
-Most common time: {insights['most_common_time']}
-
-{'='*70}
-Generated by Health Compass Symptom Tracker
-"""
-        
-        st.download_button(
-            "📥 Export Symptom Log",
-            export_text,
-            f"symptoms_{datetime.now().strftime('%Y%m%d')}.txt",
-            use_container_width=True
-        )
+        # Specialist Finder
+        entries = tracker.get_all_symptoms()
+        if entries:
+            st.markdown("---")
+            st.markdown("## 👨‍⚕️ Which Specialist?")
+            
+            recent = [e['symptom'] for e in entries[-5:]]
+            st.write(f"Based on: {', '.join(recent[:3])}")
+            
+            if st.button("🔍 Find Right Specialist", type="primary"):
+                with st.spinner("Analyzing..."):
+                    match_result = specialist_matcher.match_specialist(recent)
+                    
+                    if match_result['specialists']:
+                        top = match_result['specialists'][0]
+                        st.markdown(f"### {top['icon']} {top['name']}")
+                        st.write(f"**Confidence:** {top['confidence']:.0f}%")
+                        st.write(f"**Treats:** {top['treats']}")
+                        
+                        if match_result['urgency'] == 'urgent':
+                            st.error("🚨 URGENT - Seek immediate care")
     
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ==================== TAB 4: AI ASSISTANT CHATBOT ====================
-with tab4:
-    st.markdown("### 💬 Healthcare Assistant")
-    st.caption("Chat with your AI medical assistant - Ask questions, track medications, find hospitals")
-    
-    assistant = HealthcareAssistant()
-    
-    # Initialize chat if empty
-    if not st.session_state.chat_history:
-        st.session_state.chat_history = assistant.get_conversation_history()
+    # ==================== TAB: AI ASSISTANT ====================
+    with tab_ai:
+        st.markdown("### 💬 AI Healthcare Assistant")
+        
+        # Get profile for personalized responses
+        profile = st.session_state.user_profile
+        
+        assistant = HealthcareAssistant()
         
         if not st.session_state.chat_history:
-            # Welcome message
-            welcome = {
+            st.session_state.chat_history = [{
                 'role': 'assistant',
-                'content': f"""Hello! I'm your AI Healthcare Assistant. I can help you with:
-
-• **Medical questions** - Ask anything about health conditions, symptoms, treatments
-• **Medication tracking** - Tell me what medications you're taking
-• **Hospital finder** - Ask "What hospitals are near me?" (provide your location)
-• **Health guidance** - Get educational information and advice
-
-How can I help you today?""",
-                'timestamp': datetime.now().isoformat()
-            }
+                'content': f"""Hello! I'm your AI assistant. I can help with medical questions, medications, and finding healthcare facilities. How can I help?"""
+            }]
+        
+        # Display chat
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg['role'], avatar="🤖" if msg['role'] == 'assistant' else "👤"):
+                st.write(msg['content'])
+        
+        # Chat input
+        user_input = st.chat_input("Type your message...")
+        
+        if user_input:
+            st.session_state.chat_history.append({'role': 'user', 'content': user_input})
             
-            assistant.add_message('assistant', welcome['content'])
-            st.session_state.chat_history = [welcome]
-    
-    # Display chat history
-    for message in st.session_state.chat_history:
-        if message['role'] == 'assistant':
-            with st.chat_message("assistant", avatar="🤖"):
-                st.write(message['content'])
-                if message.get('display_time'):
-                    st.caption(message['display_time'])
-        else:
-            with st.chat_message("user", avatar="👤"):
-                st.write(message['content'])
-                if message.get('display_time'):
-                    st.caption(message['display_time'])
-    
-    # Chat input
-    user_input = st.chat_input("Type your message...")
-    
-    if user_input:
-        # Add user message
-        assistant.add_message('user', user_input)
-        st.session_state.chat_history.append({
-            'role': 'user',
-            'content': user_input,
-            'display_time': datetime.now().strftime("%I:%M %p")
-        })
-        
-        # Get RAG system
-        rag = load_rag()
-        
-        if rag:
-            with st.spinner("🤖 Assistant is thinking..."):
-                
-                # Check for special commands
-                user_lower = user_input.lower()
-                
-                # Hospital finder
-                if any(keyword in user_lower for keyword in ['hospital', 'clinic', 'doctor near', 'where can i']):
-                    # Extract location if provided
-                    profile = assistant.get_user_profile()
-                    location = profile.get('location', 'your area')
+            rag = load_rag()
+            if rag:
+                with st.spinner("🤖 Thinking..."):
                     
-                    # Check if location in message
-                    if 'in ' in user_lower or 'near ' in user_lower:
-                        # Try to extract location
-                        words = user_input.split()
-                        for i, word in enumerate(words):
-                            if word.lower() in ['in', 'near'] and i + 1 < len(words):
-                                location = ' '.join(words[i+1:])
-                                assistant.update_user_profile(location=location)
-                                break
+                    # Get profile context
+                    profile_context = profile.get_context_for_ai()
                     
-                    hospitals = assistant.get_hospital_suggestions(location)
-                    
-                    response = f"""I can help you find medical care near {location}. Here are some options:
-
-"""
-                    for i, hosp in enumerate(hospitals, 1):
-                        if hosp.get('name'):
-                            response += f"""
-**{i}. {hosp['name']}**
-"""
-                            if hosp.get('specialty'):
-                                response += f"Specialties: {hosp['specialty']}\n"
-                            if hosp.get('address'):
-                                response += f"📍 {hosp['address']}\n"
-                            if hosp.get('phone'):
-                                response += f"📞 {hosp['phone']}\n"
-                            if hosp.get('rating'):
-                                response += f"⭐ Rating: {hosp['rating']}\n"
-                            response += "\n"
-                    
-                    response += "\n💡 Would you like more information about any of these facilities?"
-                
-                # Medication tracking
-                elif any(keyword in user_lower for keyword in ['medication', 'medicine', 'pill', 'drug', 'taking', 'prescribed']):
-                    # Check tracked medications
-                    tracked_meds = assistant.get_tracked_medications()
-                    
-                    # Get AI response about medications
-                    context = assistant.get_conversation_context()
-                    
-                    prompt = f"""{context}
-
-Patient just said: {user_input}
-
-Respond helpfully about their medications:
-1. If they mentioned a medication, provide information about it (uses, dosage, side effects)
-2. If asking about interactions, explain potential concerns
-3. If asking when to take it, provide guidance
-4. Remind to follow doctor's instructions
-
-If they mentioned medication names, I'll track those for them.
-
-Be helpful and informative."""
-                    
-                    response = rag.llm.generate([
-                        {"role": "system", "content": "You are a helpful medical education assistant."},
-                        {"role": "user", "content": prompt}
-                    ], temperature=0.3, max_tokens=1000)
-                    
-                    if tracked_meds:
-                        response += f"\n\n💊 **I'm tracking these medications for you:** {', '.join([m['name'] for m in tracked_meds])}"
-                
-                # General health question
-                else:
-                    # Use RAG for medical information
+                    # Query vector DB
                     rag_result = rag.query(user_input, n_results=3)
                     
-                    # Build context-aware response
-                    context = assistant.get_conversation_context(last_n=4)
-                    
-                    prompt = f"""{context}
+                    # Build personalized prompt
+                    prompt = f"""Patient Profile:
+{profile_context}
 
 Patient asks: {user_input}
 
-Medical information from trusted sources:
-{rag_result['answer']}
+Medical info:
+{rag_result['answer'][:1200]}
 
-Respond conversationally and helpfully:
-1. Answer their question using the medical information
-2. Reference conversation context if relevant
-3. Ask if they need more details
-4. Suggest related topics if helpful
+Provide brief, personalized response (3-4 sentences):
+- Consider their age, gender, conditions, medications
+- Give practical advice
+- Mention profile factors when relevant
+- Skip legal disclaimers
 
-Keep it conversational and supportive."""
+Be helpful and conversational."""
                     
                     response = rag.llm.generate([
-                        {"role": "system", "content": "You are a friendly healthcare education assistant in an ongoing conversation."},
+                        {"role": "system", "content": "Personalized healthcare assistant."},
                         {"role": "user", "content": prompt}
-                    ], temperature=0.4, max_tokens=1200)
-                
-                # Translate if needed
-                if st.session_state.language != 'English':
-                    translate_prompt = f"Translate to {st.session_state.language}:\n\n{response}"
-                    response = rag.llm.generate([{"role": "user", "content": translate_prompt}], max_tokens=1500)
-                
-                # Add assistant response
-                assistant.add_message('assistant', response)
-                st.session_state.chat_history.append({
-                    'role': 'assistant',
-                    'content': response,
-                    'display_time': datetime.now().strftime("%I:%M %p")
-                })
-                
-                st.rerun()
+                    ], temperature=0.4, max_tokens=500)
+                    
+                    response = response.replace('<s>', '').replace('</s>', '').strip()
+                    
+                    st.session_state.chat_history.append({
+                        'role': 'assistant',
+                        'content': response
+                    })
+                    
+                    st.rerun()
     
-    # Sidebar features for chat
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("## 💬 Chat Actions")
-        
-        tracked_meds = assistant.get_tracked_medications()
-        
-        if tracked_meds:
-            st.success(f"💊 Tracking {len(tracked_meds)} medications")
-            
-            with st.expander("View tracked meds"):
-                for med in tracked_meds:
-                    st.write(f"• {med['name']}")
-                    st.caption(f"Added: {med['display_time']}")
-        
-        if st.button("🗑️ Clear Chat History", use_container_width=True):
-            assistant.clear_conversation()
-            st.session_state.chat_history = []
-            st.rerun()
-        
-        st.markdown("---")
-        
-        # Download chat
-        if st.session_state.chat_history:
-            chat_export = f"""HEALTHCARE ASSISTANT CONVERSATION
-{'='*70}
-
-Date: {datetime.now().strftime("%B %d, %Y")}
-
-CONVERSATION:
-
-"""
-            for msg in st.session_state.chat_history:
-                role = "You" if msg['role'] == 'user' else "AI Assistant"
-                chat_export += f"{role}: {msg['content']}\n\n"
-            
-            chat_export += "="*70 + "\nGenerated by Health Compass\n"
-            
-            st.download_button(
-                "📥 Download Chat",
-                chat_export,
-                f"chat_{datetime.now().strftime('%Y%m%d')}.txt",
-                use_container_width=True
-            )
-
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style='text-align: center; padding: 2rem; color: #64748B;'>
-    <div style='font-size: 1.3rem; font-weight: 700; color: #1E40AF; margin-bottom: 0.5rem;'>
-        🏥 Health Compass
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; padding: 2rem; color: #64748B;'>
+        <div style='font-size: 1.3rem; font-weight: 700; color: #1E40AF;'>
+            🏥 Health Compass
+        </div>
+        <div style='font-size: 0.95rem;'>
+            Educational Information Only • Not Medical Advice
+        </div>
+        <div style='font-size: 0.85rem; margin-top: 1rem; color: #94A3B8;'>
+            INFO 7390 Final Project | Manish K | Northeastern University
+        </div>
     </div>
-    <div style='font-size: 0.95rem;'>
-        Educational Information Only • Not Medical Advice • Always Consult Healthcare Professionals
-    </div>
-    <div style='font-size: 0.85rem; margin-top: 1rem; color: #94A3B8;'>
-        INFO 7390 Final Project | Manish K | Northeastern University
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
