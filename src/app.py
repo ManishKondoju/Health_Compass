@@ -649,8 +649,10 @@ else:
     ])
     
     # ==================== TAB: DASHBOARD ====================
-    
-    with tab_dash:
+# REPLACE the Dashboard tab section in app.py with this FIXED version
+# This fixes: Lifestyle editor, adds Reset Profile button, better editing
+
+with tab_dash:
     st.markdown("### 🏠 Your Health Dashboard")
     
     profile = st.session_state.user_profile
@@ -875,7 +877,8 @@ else:
         
         elif edit_tab == "Close Editor":
             st.session_state.show_profile_editor = False
-            st.rerun()
+            st.rerun()    
+
     # ==================== TAB: Q&A SEARCH ====================
     with tab_qa:
         st.markdown("### 🔍 Medical Information Search")
