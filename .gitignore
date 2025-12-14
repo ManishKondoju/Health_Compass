@@ -1,35 +1,34 @@
 # Python
 __pycache__/
 *.py[cod]
-*.class
+*$py.class
 *.so
 .Python
 venv/
 env/
 ENV/
+.venv/
 
-# Environment variables
+# Environment
 .env
 *.env
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-data/chroma_db/
-data/symptoms/
-data/chatbot/
+!.env.example
 
 # IDE
 .vscode/
 .idea/
 *.swp
-*.swo
 .DS_Store
 
-# Logs
-*.log
-logs/
+# Data (keep chroma_db if <100MB, else exclude)
+data/symptoms/
+data/chatbot/
+data/user_profile/
+# data/chroma_db/  ← Uncomment if >100MB
 
 # Streamlit
 .streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
