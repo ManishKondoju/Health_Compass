@@ -1,11 +1,8 @@
-# Health Compass - Production Requirements
-# Optimized for Streamlit Cloud deployment
-
 # Core Framework
 streamlit==1.29.0
 python-dotenv==1.0.0
 
-# AI/ML - LLM and Embeddings
+# AI/ML
 openai==1.6.1
 sentence-transformers==2.2.2
 
@@ -28,20 +25,15 @@ plotly==5.18.0
 tqdm==4.66.1
 python-dateutil==2.8.2
 pillow==10.1.0
-
-# Translation
-googletrans==4.0.0rc1
-
-# RSS/News Feeds
 feedparser==6.0.10
 
-# Document Processing (OCR - will fail on cloud but app handles it)
-# Note: pytesseract requires system Tesseract - not available on Streamlit Cloud
-# App includes fallback for manual text entry when OCR unavailable
+# Translation - FIXED VERSION
+deep-translator==1.11.4
 
-# Optional: Speech Recognition (not critical for deployment)
-# SpeechRecognition==3.10.0
+# Document Processing - Optional (for local use only)
+# PyPDF2==3.0.0
+# pytesseract==0.3.10
 
-# Additional dependencies that may be needed
+# Additional
 pydantic>=2.0.0
 tenacity>=8.2.0
