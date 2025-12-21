@@ -13,7 +13,7 @@ torch>=2.0.0
 huggingface-hub>=0.20.0
 
 # Vector Database
-chromadb>=0.4.18
+chromadb==0.5.23  # Use specific version
 
 # Data Processing
 pandas>=2.1.4
